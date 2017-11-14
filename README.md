@@ -2,7 +2,7 @@
 
 Color picker for Flutter, based on the Google Docs color picker.
 
-[image](/res/extras/demo.png)
+![alt text](https://raw.githubusercontent.com/long1eu/material_color_picker/master/res/extras/demo.png)
 
 ## Getting Started
 
