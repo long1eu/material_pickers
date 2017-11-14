@@ -2,6 +2,8 @@
 
 Color picker for Flutter, based on the Google Docs color picker.
 
+[image](/res/extras/demo.png)
+
 ## Getting Started
 
 You can embed into your material Them or use it on a Dialog like this:
