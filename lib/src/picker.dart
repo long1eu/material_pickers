@@ -1,5 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:material_color_picker/src/color_picker_widget.dart';
+
+/// For the tablet size we show a drop down version, just like a menu because we
+/// have space. For the mobile we show a bottom sheet that can replace the
+/// keyboard if needed.
+enum DisplayType { bottomSheet, dropDown }
 
 class _DropdownRouteLayout<T> extends SingleChildLayoutDelegate {
   _DropdownRouteLayout({this.rect, this.screen});
@@ -10,18 +15,17 @@ class _DropdownRouteLayout<T> extends SingleChildLayoutDelegate {
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
     return new BoxConstraints(
-      minWidth: kWidgetWidth,
       maxWidth: screen.width,
-      minHeight: kWidgetHeight,
-      maxHeight: kWidgetHeight ?? screen.height * 0.4,
+      maxHeight: screen.height * 0.4,
     );
   }
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    double dx = rect.left - (kWidgetWidth / 2) + rect.width / 2;
-    double dy = rect.top - kWidgetHeight;
-    return new Offset(dx, dy);
+    double dx = rect.left;
+    double dy = rect.top;
+    return new Offset(
+        screen.width / 2, screen.height / 2); // new Offset(dx, dy);
   }
 
   @override
@@ -63,34 +67,37 @@ class _WidgetDropdownRoute<T> extends PopupRoute<T> {
   }
 }
 
-/// This is an implementation for the [ColorPicker] witch displays a drop down
-/// if on tablet just above the [button] and shows a [BottomSheet] if on mobile.
-class ColorPickerButton extends StatefulWidget {
-  ColorPickerButton(
-      {this.button, this.currentColor, this.onColor, this.onShow});
+typedef Widget HeaderBuilder<T extends PickerBase<T>>(T value);
 
-  /// Provide a button that your want to show the color picker.
-  final Widget button;
+class ValuePickerButton<W extends PickerBase<V>, V> extends StatefulWidget {
+  const ValuePickerButton({
+    @required this.picker,
+    this.currentValue,
+    @required this.headerBuilder,
+    this.onValue,
+    this.onShow,
+  });
 
-  /// The [Color] you want to initialize the picker with. If the color is not in
-  /// the list then black is selected.
-  final Color currentColor;
+  final W picker;
 
-  /// You will be notified with ne new color.
-  final ValueChanged<Color> onColor;
+  final V currentValue;
 
-  /// You will be notified just before the picker becomes visible with the mode
-  /// that was picked. You can use this occasion to prepare yourself for focus
-  /// loss for example.
+  final HeaderBuilder<V> headerBuilder;
+
+  final ValueChanged<V> onValue;
+
   final ValueChanged<DisplayType> onShow;
 
   @override
-  _ColorPickerButtonState createState() => new _ColorPickerButtonState();
+  _ValuePickerButtonState<W, V> createState() =>
+      new _ValuePickerButtonState<W, V>();
 }
 
-class _ColorPickerButtonState extends State<ColorPickerButton>
-    with WidgetsBindingObserver {
-  _WidgetDropdownRoute<Color> _dropdownRoute;
+class _ValuePickerButtonState<W extends PickerBase<V>, V>
+    extends State<ValuePickerButton> with WidgetsBindingObserver {
+  V _value;
+
+  _WidgetDropdownRoute<V> _dropdownRoute;
 
   @override
   void initState() {
@@ -115,61 +122,56 @@ class _ColorPickerButtonState extends State<ColorPickerButton>
     _dropdownRoute = null;
   }
 
-  void _handleTap() {
+  void _openFontPanel() {
     final screen = MediaQuery.of(context).size;
 
+    widget.picker.onValue[0] = (newValue) => Navigator.pop(context, newValue);
+
     if (screen.shortestSide > 600) {
-      // This is a table, we are going for [PopupRoute]
+      // This is a tablet, we are going for [PopupRoute]
       final RenderBox itemBox = context.findRenderObject();
       final Rect itemRect = itemBox.localToGlobal(Offset.zero) & itemBox.size;
 
       assert(_dropdownRoute == null);
-      _dropdownRoute = new _WidgetDropdownRoute<Color>(
-        child: new ColorPicker(
-          onColor: (newValue) {
-            Navigator.pop(context, newValue);
-          },
-          currentColor: widget.currentColor,
-        ),
+      _dropdownRoute = new _WidgetDropdownRoute<V>(
+        child: widget.picker,
         rect: itemRect,
       );
 
       if (widget.onShow != null) widget.onShow(DisplayType.dropDown);
-      Navigator.push(context, _dropdownRoute).then<Null>((Color newValue) {
+      Navigator.push(context, _dropdownRoute).then<Null>((V newValue) {
         _dropdownRoute = null;
         if (!mounted || newValue == null) return null;
-        if (widget.onColor != null) widget.onColor(newValue);
+
+        if (widget.onValue != null) {
+          widget.onValue(newValue);
+        }
       });
     } else {
       if (widget.onShow != null) widget.onShow(DisplayType.bottomSheet);
       showModalBottomSheet(
-        builder: (context) {
-          return new ColorPicker(
-            onColor: (newValue) {
-              Navigator.pop(context, newValue);
-            },
-            currentColor: widget.currentColor,
-            type: MaterialType.transparency,
-          );
-        },
+        builder: (context) => widget.picker,
         context: context,
       ).then((newValue) {
-        if (widget.onColor != null) widget.onColor(newValue);
+        if (widget.onValue != null) {
+          widget.onValue(newValue);
+        }
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    context.findRenderObject();
-    return new GestureDetector(
-      onTap: _handleTap,
-      child: widget.button,
+    return new Container(
+      width: 112.0,
+      child: new GestureDetector(
+          onTap: _openFontPanel, child: widget.headerBuilder(_value)),
     );
   }
 }
 
-/// For the tablet size we show a drop down version, just like a menu because we
-/// have space. For the mobile we show a bottom sheet that can replace the
-/// keyboard if needed.
-enum DisplayType { bottomSheet, dropDown }
+abstract class PickerBase<V> extends StatefulWidget {
+  const PickerBase();
+
+  final List<ValueChanged<V>> onValue = const [];
+}

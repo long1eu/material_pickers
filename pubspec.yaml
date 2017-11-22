@@ -1,6 +1,6 @@
-name: material_color_picker
-description: Color picker for Flutter.
-version: 0.0.1
+name: material_pickers
+description: Material pickers for Flutter.
+version: 0.0.2
 author: "Lung Razvan (long1eu)<lung.razvan@gmail.com>"
 homepage: http://www.long1.eu
 

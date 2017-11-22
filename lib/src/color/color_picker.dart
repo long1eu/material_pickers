@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:material_color_picker/src/colors.dart';
+import 'package:material_pickers/src/color/colors.dart';
+import 'package:material_pickers/src/picker.dart';
 
 /// The size of the color box from the main color row.
 const double _kColorBoxSize = 24.0;
@@ -52,13 +53,14 @@ const double kWidgetHeight = _kMarginSize * 4 +
 /// color shifting.
 const int _kFrameAnimationDuration = 200;
 
-class ColorPicker extends StatefulWidget {
+class ColorPicker extends PickerBase<Color> {
   const ColorPicker({
     this.currentColor,
     this.elevation,
     this.onColor,
     this.type,
-  });
+  })
+      : super();
 
   /// The [Color] you want to initialize the picker with. If the color is not in
   /// the list then black is selected.
