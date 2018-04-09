@@ -180,7 +180,7 @@ class _ColorPickerState extends State<ColorPicker>
 
     Animation animation;
     animation =
-        new Tween(begin: 0, end: _lastColorList.length).animate(controller)
+        new Tween(begin: 0.0, end: _lastColorList.length).animate(controller)
           ..addListener(() {
             int position =
                 (animation.value * _lastColorList.length / 10).ceil();
