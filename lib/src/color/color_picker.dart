@@ -295,7 +295,7 @@ class _ColorPickerState extends State<ColorPicker>
                         color: new Color(0x00000000),
                         child: new Image.asset(
                           "res/images/placer.png",
-                          package: "material_color_picker",
+                          package: "material_pickers",
                           width: _frameWidth,
                         ),
                       ),
