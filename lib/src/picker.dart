@@ -62,6 +62,9 @@ class _WidgetDropdownRoute<T> extends PopupRoute<T> {
   @override
   Duration get transitionDuration => const Duration(milliseconds: 200);
 
+  @override
+  String get barrierLabel => "Dismiss";
+
   void _dismiss() {
     navigator?.removeRoute(this);
   }
