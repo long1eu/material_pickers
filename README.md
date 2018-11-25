@@ -7,7 +7,7 @@ Color picker for Flutter, based on the Google Docs color picker.
 ## Getting Started
 
 You can embed into your material app or use it on a Dialog like this:
-
+```dart
     Future<Color> askedToLead() async => await showDialog(
         context: context,
         child: new SimpleDialog(
@@ -23,5 +23,5 @@ You can embed into your material app or use it on a Dialog like this:
           ],
         ),
       );
-
+```
 For help getting started with Flutter, view our online [documentation](http://flutter.io/).
